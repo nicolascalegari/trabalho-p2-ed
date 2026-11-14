@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Simulador interativo de Heap Binário e fila de prioridade.">
+  <title>Laboratório de Heaps Binários</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="container header-content">
+      <div>
+        <p class="eyebrow">ESTRUTURAS DE DADOS · TEMA C</p>
+        <h1>Laboratório de Heaps Binários</h1>
+        <p class="subtitle">Explore Min-Heap e Max-Heap, acompanhe cada comparação e visualize as trocas.</p>
+      </div>
+      <span class="header-tag">Simulador didático</span>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="panel controls-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">CONFIGURAÇÃO</p>
+          <h2>Prepare a simulação</h2>
+        </div>
+        <span class="status" id="status">Pronto</span>
+      </div>
+
+      <div class="control-grid">
+        <label>Tipo de Heap
+          <select id="heapType">
+            <option value="min">Min-Heap (menor na raiz)</option>
+            <option value="max">Max-Heap (maior na raiz)</option>
+          </select>
+        </label>
+        <label>Operação
+          <select id="operation">
+            <option value="insert">Inserir valor (sift-up)</option>
+            <option value="extract">Remover raiz (sift-down)</option>
+          </select>
+        </label>
+        <label id="valueField">Valor para inserir
+          <input id="insertValue" type="number" value="12" step="1">
+        </label>
+      </div>
+
+      <div class="scenario-row">
+        <span class="field-caption">Cenários pré-configurados</span>
+        <button class="button button-soft scenario" data-scenario="medium">Caso Médio</button>
+        <button class="button button-soft scenario" data-scenario="worst">Pior Caso</button>
+        <button class="button button-soft scenario" data-scenario="custom">Exemplo Customizado</button>
+      </div>
+      <label class="custom-field">Valores personalizados (separados por vírgula)
+        <input id="customValues" type="text" value="18, 25, 30, 40, 35, 42" placeholder="Ex.: 18, 25, 30, 40">
+      </label>
+      <div class="action-row">
+        <button class="button button-primary" id="startBtn">Preparar operação</button>
+        <button class="button button-play" id="playBtn">▶ Executar / Play</button>
+        <button class="button button-soft" id="stepBtn">Próximo passo</button>
+        <button class="button button-soft" id="pauseBtn">Pausar</button>
+        <button class="button button-outline" id="resetBtn">Reiniciar</button>
+      </div>
+      <p class="hint">Dica: carregue um cenário, escolha Min-Heap ou Max-Heap e avance passo a passo.</p>
+    </section>
+
+    <section class="workspace">
+      <section class="panel visualization-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">REPRESENTAÇÃO VISUAL</p>
+            <h2>Árvore e array</h2>
+          </div>
+          <span class="legend"><i></i> Elemento em destaque</span>
+        </div>
+        <div class="tree-wrap">
+          <svg id="treeLines" aria-hidden="true"></svg>
+          <div id="treeNodes" class="tree-nodes"></div>
+          <div id="emptyMessage" class="empty-message">O heap está vazio. Insira um valor para começar.</div>
+        </div>
+        <div class="array-title">
+          <strong>Array interno</strong>
+          <span>Índices iniciados em zero</span>
+        </div>
+        <div id="arrayView" class="array-view"></div>
+      </section>
+
+      <aside class="side-column">
+        <section class="panel metrics-panel">
+          <p class="eyebrow">CONTADORES</p>
+          <h2>Métricas da execução</h2>
+          <div class="metric-grid">
+            <div class="metric"><span>Passo</span><strong id="stepMetric">0 / 0</strong></div>
+            <div class="metric"><span>Comparações</span><strong id="comparisons">0</strong></div>
+            <div class="metric"><span>Trocas (swaps)</span><strong id="swaps">0</strong></div>
+            <div class="metric"><span>Operações</span><strong id="operations">0</strong></div>
+          </div>
+        </section>
+
+        <section class="panel explanation-panel">
+          <p class="eyebrow">ACOMPANHAMENTO</p>
+          <h2>O que está acontecendo?</h2>
+          <p id="stepDescription" class="step-description">Prepare uma operação para visualizar o algoritmo.</p>
+          <div class="variables">
+            <h3>Variáveis auxiliares</h3>
+            <dl>
+              <div><dt>índice atual</dt><dd id="currentIndex">—</dd></div>
+              <div><dt>pai</dt><dd id="parentIndex">—</dd></div>
+              <div><dt>filho esquerdo</dt><dd id="leftIndex">—</dd></div>
+              <div><dt>filho direito</dt><dd id="rightIndex">—</dd></div>
+              <div><dt>índice escolhido</dt><dd id="chosenIndex">—</dd></div>
+            </dl>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="panel log-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">HISTÓRICO</p>
+          <h2>Log de execução</h2>
+        </div>
+        <span class="log-count" id="logCount">0 eventos</span>
+      </div>
+      <ol id="eventLog" class="event-log">
+        <li class="muted-log">Os eventos da simulação aparecerão aqui.</li>
+      </ol>
+    </section>
+
+    <section class="info-grid">
+      <article class="info-card">
+        <h3>Propriedade do Heap</h3>
+        <p><strong>Min-Heap:</strong> cada pai é menor ou igual aos filhos. A raiz contém o menor valor.</p>
+        <p><strong>Max-Heap:</strong> cada pai é maior ou igual aos filhos. A raiz contém o maior valor.</p>
+      </article>
+      <article class="info-card">
+        <h3>Fórmulas de índices</h3>
+        <p>Para um nó no índice <code>i</code>: pai = <code>⌊(i − 1) / 2⌋</code>, filho esquerdo = <code>2i + 1</code> e filho direito = <code>2i + 2</code>.</p>
+      </article>
+      <article class="info-card">
+        <h3>Complexidade</h3>
+        <p>Inserção e remoção da raiz: <code>O(log n)</code> no pior caso. Consulta à raiz: <code>O(1)</code>. Construção bottom-up: <code>O(n)</code>.</p>
+      </article>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">Trabalho P2 — Estruturas de Dados · Heap Binário e Filas de Prioridade</div>
+  </footer>
+  <script src="app.js"></script>
+</body>
+</html>
